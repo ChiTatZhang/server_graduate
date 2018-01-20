@@ -78,43 +78,11 @@ int save_faceImage(Mat &image,const char *path,const int lable)
 		return 0;
 		*/
 }
-int read_csv(const string &filename,vector<Mat>&images,vector<int>&lables,char separator=';')
-{
-	ifstream file;
-	stringstream stream;
-	string line,imgPath,lable;
-	file.open(filename.c_str(),ios::in);
-	if(file.is_open())
-	{
-		while(getline(file,line))
-		{
-			//		cout<<line<<endl;
-			stream<<line;
-			getline(stream,imgPath,separator);
-			getline(stream,lable);
-			cout<<imgPath<<"           "<<lable<<endl;
-			stream.clear();
-			images.push_back(imread(imgPath,0));
-			lables.push_back(atoi(lable.c_str()));
-			char sql[128]={0};
-			sprintf(sql,"insert into imgpath (id,path) values(%s,'%s');",lable.c_str(),imgPath.c_str());
-			int ret=sqlite(sql);
-			if(ret<0)
-			{
-				cout<<"data insert error"<<endl;
-			}
 
-		}
-	}
-	else
-	{
-		cout<<"data.txt打开失败"<<endl;
-	}
-	return 0;
-}
-int add_face(VideoCapture &capture,const string &name)
+
+int add_face(VideoCapture &capture)
 {
-	//	VideoCapture capture(0);
+#if 0	//	VideoCapture capture(0);
 	int key=0;
 	static int num=0;
 	static int sum=0;
@@ -148,27 +116,8 @@ int add_face(VideoCapture &capture,const string &name)
 
 	}
 	return 0;
-}
-int main()
-{
-	vector<Mat>imgs;
-	vector<int>lab;
-	//	Mat image = imread("timg.jpeg");
-	//	save_faceImage(image,"./photo/","face1","data.txt");
-	/*	for(im=imgs.begin();im!= imgs.end();im++)
-		{
-		imshow("face",*im);
-		waitKey(100);
-		}
-		*/		
-	VideoCapture capture(0);
-	int key;
-	//vector<Mat>frames;
-#if 1
-	cout<<"1 添加 2 识别"<<endl;
-	cin>>key;
-	if(key==1)
-	{
+#else
+		int key=0;
 		while(1)
 		{
 			int id=0;
@@ -211,8 +160,30 @@ int main()
 				break;
 			}
 		}
-	}
 #endif
+}
+int main()
+{
+	vector<Mat>imgs;
+	vector<int>lab;
+	//	Mat image = imread("timg.jpeg");
+	//	save_faceImage(image,"./photo/","face1","data.txt");
+	/*	for(im=imgs.begin();im!= imgs.end();im++)
+		{
+		imshow("face",*im);
+		waitKey(100);
+		}
+		*/		
+	VideoCapture capture(0);
+	int key;
+	//vector<Mat>frames;
+
+	cout<<"1 添加 2 识别"<<endl;
+	cin>>key;
+	if(key==1)
+	{
+		add_face(capture);
+	}
 	int time=0;
 	//	read_csv("at.txt",imgs,lab);
 	char sql[128]="select id,path from imgpath";
@@ -232,10 +203,8 @@ int main()
 	}
 	free(ip);
 	cout<<imgs.size()<<lab.size()<<endl;
-	//	vector<Mat>::iterator im;
 	int MaxLab=lab[lab.size()-1];
 	cout<<"maxlab: "<<MaxLab<<endl;
-	//	save_faceImage(frames,"att_faces","42","at.txt");
 	cout<<"training...."<<endl;
 	Ptr<FaceRecognizer> model =LBPHFaceRecognizer::create();
 	model->train(imgs,lab);
@@ -269,11 +238,11 @@ int main()
 					time=0;
 					string name = "wujiabin";
 					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));    
-				}else if((predictLab==20180100 || predictLab==42) && number<90){
+				}else if((predictLab==20180101 || predictLab==20180100 || predictLab==42) && number<80){
 					time=0;
 					string name = "zhangzhida";
 					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 0));    	
-				}else if(predictLab==45 && number<90){
+				}else if(predictLab==20180102 ||predictLab==45 && number<90){
 					time=0;
 					string name = "liuchangxin";
 					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 0));    	
@@ -293,11 +262,11 @@ int main()
 		if(key=='p')
 		{
 			MaxLab++;
-			add_face(capture,to_string(MaxLab));
+			//add_face(capture,to_string(MaxLab));
 		}
 		if(key=='t')
 		{
-			read_csv("at.txt",imgs,lab);
+			///read_csv("at.txt",imgs,lab);
 			cout<<imgs.size()<<lab.size()<<endl;
 			MaxLab=lab[lab.size()-1];
 			cout<<"maxlab: "<<MaxLab<<endl;
@@ -311,9 +280,5 @@ int main()
 		}
 	}
 
-	//Mat testImg=imread("photo0.jpg",0);
-	//Mat testImg=imgs[imgs.size()-1];
-	//int testLab=lab[imgs.size()-1];
-	//int testLab=0;
 
 }
