@@ -7,37 +7,29 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <fstream>
-#include "facedetect.h"
+#include "faceRecognise.h"
 #include "database.h"
 using namespace std;
 using namespace cv; 
 using namespace face;
 
-
 int save_faceImage(Mat &image,const char *path,const int lable)
 {
-	//	Mat image=imread("timg.jpeg");
 	vector<Mat> faceImg;
 	vector<Mat>::iterator face;
-	//ofstream file;
-	//file.open(csvPath,ios::out|ios::app);
 	static int num =0;
-	//	for(face=images.begin();face!=images.end();face++){
 	detect_face(image,NULL,&faceImg);
 	cout<<"face:"<<faceImg.size()<<endl;
 	char makeDir[64]={0};
 	snprintf(makeDir,sizeof(makeDir),"mkdir %s",path);
 	system(makeDir);
 	imshow("img",image);
-	//for(face=faceImg.begin();face!=faceImg.end();face++)
 	if(faceImg.size()==1)
 	{
 		char tmppath[64]={0};
 		snprintf(tmppath,sizeof(tmppath),"%s/%d.jpg",path,num);
 		num++;
 		cout<<"write_num: "<<num<<endl;
-		//		Mat tmpFace;
-		//		resize(*face,tmpFace,Size(100,100));
 		imshow("save",faceImg[0]);
 		waitKey(500);
 		cout<<num<<endl;	
@@ -50,142 +42,61 @@ int save_faceImage(Mat &image,const char *path,const int lable)
 		{
 			cout<<"data insert error"<<endl;
 		}
-#if 0
-		if(file.is_open())
-		{
-			file<<path<<";"<<name<<"\n";
-			file.close();
-			return 0;
-		}
-		else
-		{
-			cout<<path<<" 写入"<<csvPath<<"失败"<<endl;
-			return -1;
-		}
-#endif
 	}
-	//	}
-	//file.close();
 	cout<<"over"<<endl;
-	//	waitKey(0);
 	return -1;
-	//namedWindow("photo");
-	/*	imshow("photo",image);
-		while(waitKey(1)!='n');
-		Mat ROI =image(Rect(1,1,image.cols/2,image.rows/2));
-		imshow("ROI",ROI);
-		while(waitKey(0)!='n');
-		return 0;
-		*/
 }
 
 
 int add_face(VideoCapture &capture)
 {
-#if 0	//	VideoCapture capture(0);
 	int key=0;
-	static int num=0;
-	static int sum=0;
-	while(key=waitKey(100))
+	while(1)
 	{
-		Mat frame;
-		capture>>frame;
-		vector<Mat> MatImg;
-		detect_face(frame,NULL,&MatImg);
-		imshow("face",frame);
-		if(MatImg.size()==1)
+		int id=0;
+		string name;
+		cout<<"请输入id号"<<endl;
+		cin>>id;
+		cout<<"请输入名字"<<endl;
+		cin>>name;
+		while(key=waitKey(100))
 		{
-			num++;	
-			if(num>=10)
+			Mat frame;
+			Mat myFace;
+			static int num=0;
+			capture>>frame;
+			vector<Rect> rec;
+			detect_face(frame,&rec);
+			if(key=='p')
 			{
-				//int ret=save_faceImage(frame,"./att_faces/",name.c_str(),"at.txt");
-				int ret=0;
-				if(ret==0)
+				if(rec.size()==1)
 				{
-					imshow("getFace",MatImg[0]);
-					num=0;
-					sum++;
+					char path[64];
+					sprintf(path,"./att_faces/%d",id);
+					save_faceImage(frame,path,id);
+					num++;
 				}
+				cout<<"已保存"<<num<<"张图片"<<endl;
 			}
+			imshow("video",frame);
+			if(num>9){
+				break;
+			}
+
 		}
-		if(sum>=10)
+		cout<<"继续添加请按n\n"<<"退出添加请按q"<<endl;
+		string str;
+		cin>>str;
+		if(str=="q")
 		{
 			break;
 		}
-
-
 	}
-	return 0;
-#else
-		int key=0;
-		while(1)
-		{
-			int id=0;
-			string name;
-			cout<<"请输入id号"<<endl;
-			cin>>id;
-			cout<<"请输入名字"<<endl;
-			cin>>name;
-			while(key=waitKey(100))
-			{
-				Mat frame;
-				Mat myFace;
-				//string str="photo";
-				static int num=0;
-				capture>>frame;
-				vector<Rect> rec;
-				detect_face(frame,&rec);
-				if(key=='p')
-				{
-					if(rec.size()==1)
-					{
-						char path[64];
-						sprintf(path,"./att_faces/%d",id);
-						save_faceImage(frame,path,id);
-						num++;
-					}
-					cout<<"已保存"<<num<<"张图片"<<endl;
-				}
-				imshow("video",frame);
-				if(num>9){
-					break;
-				}
-
-			}
-			cout<<"继续添加请按n\n"<<"退出添加请按q"<<endl;
-			string str;
-			cin>>str;
-			if(str=="q")
-			{
-				break;
-			}
-		}
-#endif
 }
-int main()
+int train()
 {
 	vector<Mat>imgs;
 	vector<int>lab;
-	//	Mat image = imread("timg.jpeg");
-	//	save_faceImage(image,"./photo/","face1","data.txt");
-	/*	for(im=imgs.begin();im!= imgs.end();im++)
-		{
-		imshow("face",*im);
-		waitKey(100);
-		}
-		*/		
-	VideoCapture capture(0);
-	int key;
-	//vector<Mat>frames;
-
-	cout<<"1 添加 2 识别"<<endl;
-	cin>>key;
-	if(key==1)
-	{
-		add_face(capture);
-	}
-	int time=0;
-	//	read_csv("at.txt",imgs,lab);
 	char sql[128]="select id,path from imgpath";
 	struct imgpath *ip;
 	int num;
@@ -193,6 +104,7 @@ int main()
 	if(ret<0)
 	{
 		cout<<"imgpath select error"<<endl;
+		return -1;
 	}
 	struct imgpath *tmpip=ip;
 	for(int i=0;i<num;i++)
@@ -209,76 +121,73 @@ int main()
 	Ptr<FaceRecognizer> model =LBPHFaceRecognizer::create();
 	model->train(imgs,lab);
 	model->write("test.xml");
-	while(key=waitKey(100)){
-		Mat tmpframe;
-		capture>>tmpframe;
-		Mat testImg;
-		vector<Rect> rec;
-		detect_face(tmpframe,&rec);
-		Point text;
-		cout<<"detect_face rec.size()"<<rec.size()<<endl;
-		if(rec.size()>0){
+	return 0;	
+}
 
-			cvtColor(tmpframe,testImg,CV_BGR2GRAY);
-			vector<Rect>::iterator pRec;
-			for(pRec=rec.begin();pRec!=rec.end();pRec++){
-				text=Point((*pRec).x,(*pRec).y);
-				Mat faceImg=testImg(*pRec);
-				Mat resizeImg;
-				resize(faceImg,resizeImg,Size(92,112));
-				imshow("tmpImg",resizeImg);
-				int label;
-				double number;
-				model->predict(resizeImg, label, number);
-				//	cout<<"predictLab="<<predictLab<<endl;
-				cout<<"label:" << label << endl;
-				cout<<"num:" << number << endl;
-				int predictLab = label;
-				if((predictLab == 41 || predictLab==44) && number<90){
-					time=0;
-					string name = "wujiabin";
-					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 0, 255));    
-				}else if((predictLab==20180101 || predictLab==20180100 || predictLab==42) && number<80){
-					time=0;
-					string name = "zhangzhida";
-					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 0));    	
-				}else if(predictLab==20180102 ||predictLab==45 && number<90){
-					time=0;
-					string name = "liuchangxin";
-					putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(0, 255, 0));    	
-				}else
-				{
-					time++;
-					if(time>=50)
-					{
-						string name ="other";
-						putText(tmpframe, name, text, FONT_HERSHEY_COMPLEX, 1, Scalar(255 ,0 , 0));    	
+int recognise(Mat &tmpframe,int &label,double &number)
+{
+	Ptr<FaceRecognizer> model =LBPHFaceRecognizer::create();
+	model->read("test.xml");
+	Mat testImg;
+	vector<Rect> rec;
+	detect_face(tmpframe,&rec);
+	cout<<"detect_face rec.size()"<<rec.size()<<endl;
+	if(rec.size()!=1)
+		return -1;
+	else
+	{
+		cvtColor(tmpframe,testImg,CV_BGR2GRAY);
+		vector<Rect>::iterator pRec;
+		for(pRec=rec.begin();pRec!=rec.end();pRec++){
 
-					}
-				}	
-			}
-		}
-		imshow("video",tmpframe);
-		if(key=='p')
-		{
-			MaxLab++;
-			//add_face(capture,to_string(MaxLab));
-		}
-		if(key=='t')
-		{
-			///read_csv("at.txt",imgs,lab);
-			cout<<imgs.size()<<lab.size()<<endl;
-			MaxLab=lab[lab.size()-1];
-			cout<<"maxlab: "<<MaxLab<<endl;
-			cout<<"training...."<<endl;
-			model->train(imgs,lab);
-			model->write("test.xml");
-		}
-		if(key=='n')
-		{
-			break;
+			Mat faceImg=testImg(*pRec);
+			Mat resizeImg;
+			resize(faceImg,resizeImg,Size(92,112));
+
+			model->predict(resizeImg, label, number);
+			cout<<"label:" << label << endl;
+			cout<<"num:" << number << endl;
 		}
 	}
-
-
+	return 0;
 }
+#if 0
+int main()
+{
+	//	VideoCapture capture(0);
+	//	int key;
+
+	//	int time=0;
+
+	/*int trainRet=train();
+	  if(trainRet>0)
+	  cout<<"train fialed"<<endl;
+	  else
+	  cout<<"train success"<<endl;*/
+	//	while(key=waitKey(100)){
+	Mat tmpframe=imread("./att_faces/20180100/0.jpg");
+	//		capture>>tmpframe;
+	int lab;
+	double num;
+	recognise(tmpframe,lab,num);
+	int predictLab=lab;
+	double number=num;
+	if((predictLab==20180101 || predictLab==20180100 || predictLab==42) && number<80){
+		string name = "zhangzhida";
+		cout<<name;
+	}else if(predictLab==20180102 ||predictLab==45 && number<90){
+		string name = "liuchangxin";
+		cout<<name;
+	}else
+	{
+		string name ="other";
+		cout<<name;
+	}	
+
+
+	imshow("video",tmpframe);
+	return 0;
+}
+
+
+#endif

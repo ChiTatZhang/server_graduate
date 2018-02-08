@@ -16,6 +16,18 @@ struct  staffinfo
 	char dept[32];
 	char passwd[32];
 	int authority;
+	int leader;
+};
+struct dept
+{
+	int id;
+	char name[32];
+};
+
+struct position
+{
+	int id;
+	char name[32];
 };
 struct attendence{
 	int id;
@@ -24,9 +36,6 @@ struct attendence{
 	char comeTime[16];
 	char leaveTime[16];
 	double workTime;
-	int bookIn;
-	int evection;
-	int vacate;
 	char account[128];
 };
 struct iochalk{
@@ -45,22 +54,32 @@ struct overtime{
 };
 struct vacate
 {
+	int Index;
 	int id; 
 	char name[15];
-	char action[15];
-	char end[15];
-	int intervar;
+	char action[32];
+	char end[32];
+	double intervar;
 	char cause[127];
+	int status;
+	int isread;
+	int leader;
+	char hearTime[32];
 };
 struct evection{
+	int Index;
 	int id;
-	char name[15];
-	char action[15];
-	char end[15];
-	int interval;
-	char loction[31];
+	char name[16];
+	char action[32];
+	char end[32];
+	double interval;
+	char loction[32];
 	char cause[127];
-}  ;
+	int status;
+	int isread;
+	int leader;
+	char hearTime[32];
+};
 struct stats{
 	int id;
 	char name[15];
@@ -70,6 +89,8 @@ struct stats{
 	int truant;
 	int vacate;
 	int evection;
+	int overtime;
+	int otsize;
 };
 struct settime{
 	char ss[15];
@@ -96,4 +117,6 @@ int sqlite(struct stats **data,const char *sql,int *num);
 int sqlite(struct settime **data,const char *sql,int *num);
 int sqlite(struct caller **data,const char *sql,int *num);
 int sqlite(struct imgpath **data,const char *sql,int *num);
+int sqlite(struct dept **data,const char *sql,int *num);
+int sqlite(struct position **data,const char *sql,int *num);
 #endif //_DATABASE_H

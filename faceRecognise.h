@@ -8,5 +8,7 @@
 using namespace std;
 using namespace cv;
  void detect_face(Mat &image,vector<Rect> *RFaceImg=NULL,vector<Mat> *mFaceImg=NULL);
+ int train();
+ int recognise(Mat &tmpframe,int &label,double &number);
 #endif
 

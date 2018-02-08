@@ -112,7 +112,9 @@ int sqlite(struct staffinfo **data,const char *sql,int *num)
 	for(int i=0;i<row;i++)
 	{
 		//*data->stdno=pResult[tmpCol++];
+		cout<<"jfksdljfklsfjkldsjfkls"<<endl;
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->id));
+	
 		strcpy(tmpdata->name,pResult[tmpCol++]);
 		strcpy(tmpdata->telephone,pResult[tmpCol++]);
 		strcpy(tmpdata->emile,pResult[tmpCol++]);
@@ -121,6 +123,8 @@ int sqlite(struct staffinfo **data,const char *sql,int *num)
 		strcpy(tmpdata->dept,pResult[tmpCol++]);
 		strcpy(tmpdata->passwd,pResult[tmpCol++]);
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->authority));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->leader));
+		cout<<tmpdata->leader<<endl;
 		//cout<<(*data)->stdno<<(*data)->name<<(*data)->age<<(*data)->score<<endl;
 		tmpdata++;
 		/*cout<<"第"<<i<<"组数据"<<endl;
@@ -178,9 +182,6 @@ int sqlite(struct attendence **data,const char *sql,int *num)
 		strcpy(tmpdata->date,pResult[tmpCol++]);
 		strcpy(tmpdata->comeTime,pResult[tmpCol++]);
 		strcpy(tmpdata->leaveTime,pResult[tmpCol++]);
-		sscanf(pResult[tmpCol++],"%d",&(tmpdata->bookIn));
-		sscanf(pResult[tmpCol++],"%d",&(tmpdata->evection));
-		sscanf(pResult[tmpCol++],"%d",&(tmpdata->vacate));
 		strcpy(tmpdata->account,pResult[tmpCol++]);
 		sscanf(pResult[tmpCol++],"%lf",&(tmpdata->workTime));
 
@@ -352,14 +353,20 @@ int sqlite(struct vacate **data,const char *sql,int *num)
 	for(int i=0;i<row;i++)
 	{
 		//*data->stdno=pResult[tmpCol++];
-		tmpCol++;
+
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->Index));
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->id));
 		strcpy(tmpdata->name,pResult[tmpCol++]);
 		strcpy(tmpdata->action,pResult[tmpCol++]);
 		strcpy(tmpdata->end,pResult[tmpCol++]);
-		sscanf(pResult[tmpCol++],"%d",&(tmpdata->intervar));
+		sscanf(pResult[tmpCol++],"%lf",&(tmpdata->intervar));
 		strcpy(tmpdata->cause,pResult[tmpCol++]);
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->status));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->isread));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->leader));
+		strcpy(tmpdata->hearTime,pResult[tmpCol++]);
 		//cout<<(*data)->stdno<<(*data)->name<<(*data)->age<<(*data)->score<<endl;
+		cout<<tmpdata->hearTime<<endl;
 		tmpdata++;
 		/*cout<<"第"<<i<<"组数据"<<endl;
 		  for(int j=0;j<col;j++)
@@ -411,14 +418,19 @@ int sqlite(struct evection **data,const char *sql,int *num)
 	for(int i=0;i<row;i++)
 	{
 		//*data->stdno=pResult[tmpCol++];
-		tmpCol++;
+		
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->Index));
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->id));
 		strcpy(tmpdata->name,pResult[tmpCol++]);
 		strcpy(tmpdata->action,pResult[tmpCol++]);
 		strcpy(tmpdata->end,pResult[tmpCol++]);
-		sscanf(pResult[tmpCol++],"%d",&(tmpdata->interval));
+		sscanf(pResult[tmpCol++],"%lf",&(tmpdata->interval));
 		strcpy(tmpdata->loction,pResult[tmpCol++]);
 		strcpy(tmpdata->cause,pResult[tmpCol++]);
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->status));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->isread));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->leader));
+		strcpy(tmpdata->hearTime,pResult[tmpCol++]);
 		//cout<<(*data)->stdno<<(*data)->name<<(*data)->age<<(*data)->score<<endl;
 		tmpdata++;
 		/*cout<<"第"<<i<<"组数据"<<endl;
@@ -480,6 +492,8 @@ int sqlite(struct stats **data,const char *sql,int *num)
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->truant));
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->vacate));
 		sscanf(pResult[tmpCol++],"%d",&(tmpdata->evection));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->overtime));
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->otsize));
 		//cout<<(*data)->stdno<<(*data)->name<<(*data)->age<<(*data)->score<<endl;
 		tmpdata++;
 		/*cout<<"第"<<i<<"组数据"<<endl;
@@ -532,8 +546,9 @@ int sqlite(struct settime **data,const char *sql,int *num)
 	for(int i=0;i<row;i++)
 	{
 		//*data->stdno=pResult[tmpCol++];
+		tmpCol++;
 		strcpy(tmpdata->ss,pResult[tmpCol++]);
-		strcpy(tmpdata->ss,pResult[tmpCol++]);
+		strcpy(tmpdata->sx,pResult[tmpCol++]);
 		strcpy(tmpdata->xs,pResult[tmpCol++]);
 		strcpy(tmpdata->xx,pResult[tmpCol++]);
 		//cout<<(*data)->stdno<<(*data)->name<<(*data)->age<<(*data)->score<<endl;
@@ -655,6 +670,97 @@ int sqlite(struct imgpath **data,const char *sql,int *num)
 		  cout<<pResult[j]<<": "<<pResult[tmpCol]<<endl;
 		  tmpCol++;	
 		  }*/
+
+	}
+	sqlite3_free_table(pResult);
+	sqlite3_close(db);
+	return 0;
+}
+int sqlite(struct dept **data,const char *sql,int *num)
+{
+	sqlite3 *db;
+	char *zErrMsg;
+	char ** pResult;
+	int row,col;
+	int rc;
+	rc = sqlite3_open("test.db",&db);
+	if(rc != 0)
+	{
+		fprintf(stderr,"Can't open database:%s\r\n",sqlite3_errmsg(db));
+		return -1;
+	}else{
+		fprintf(stderr,"Opened database successfully\r\n");
+	}
+
+	//const char *sql;
+	//sql = "select * from student ;";
+	rc = sqlite3_get_table(db,sql,&pResult,&row,&col,&zErrMsg);
+	if(rc != SQLITE_OK)
+	{
+		fprintf(stderr,"SQL error:%s\n",zErrMsg);
+		sqlite3_close(db);
+		sqlite3_free(zErrMsg);
+		return -1;
+	}
+	else
+	{
+		fprintf(stdout,"select item successfully\r\n");
+	}
+	*num=row;
+	*data=(struct dept *)malloc(sizeof(struct dept)*(*num));
+	struct dept *tmpdata=*data;
+	int tmpCol=col;
+	for(int i=0;i<row;i++)
+	{
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->id));
+		strcpy(tmpdata->name,pResult[tmpCol++]);
+		tmpdata++;
+
+	}
+	sqlite3_free_table(pResult);
+	sqlite3_close(db);
+	return 0;
+}
+
+int sqlite(struct position **data,const char *sql,int *num)
+{
+	sqlite3 *db;
+	char *zErrMsg;
+	char ** pResult;
+	int row,col;
+	int rc;
+	rc = sqlite3_open("test.db",&db);
+	if(rc != 0)
+	{
+		fprintf(stderr,"Can't open database:%s\r\n",sqlite3_errmsg(db));
+		return -1;
+	}else{
+		fprintf(stderr,"Opened database successfully\r\n");
+	}
+
+	//const char *sql;
+	//sql = "select * from student ;";
+	rc = sqlite3_get_table(db,sql,&pResult,&row,&col,&zErrMsg);
+	if(rc != SQLITE_OK)
+	{
+		fprintf(stderr,"SQL error:%s\n",zErrMsg);
+		sqlite3_close(db);
+		sqlite3_free(zErrMsg);
+		return -1;
+	}
+	else
+	{
+		fprintf(stdout,"select item successfully\r\n");
+	}
+	*num=row;
+	*data=(struct position *)malloc(sizeof(struct position)*(*num));
+	struct position *tmpdata=*data;
+	int tmpCol=col;
+	for(int i=0;i<row;i++)
+	{
+		sscanf(pResult[tmpCol++],"%d",&(tmpdata->id));
+		strcpy(tmpdata->name,pResult[tmpCol++]);
+		tmpdata++;
 
 	}
 	sqlite3_free_table(pResult);
